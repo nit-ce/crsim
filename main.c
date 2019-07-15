@@ -1,26 +1,136 @@
+#include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
-int left(long ax, long ay, long bx, long by)
+#define PI 3.14159265
+
+using namespace std;
+
+
+
+double distanceBetweenTwoPoints(double px1,double py1,double px2,double py2)
 {
-	return (ax * by) - (ay * bx) < 0;
+    double d = sqrt( pow((px2-px1),2) + pow((py2-py1),2) );
+    return d;
 }
 
-long hausdorff_point(long ax, long ay, long bx, long by, long px, long py)
+double prependicularDistance(double px, double py,
+                             double vx1, double vy1, double vx2, double vy2)
 {
-	long rx = bx + (ay - by);
-	long ry = by + (bx - ax);
-	long sx = ax + (ay - by);
-	long sy = ay + (bx - ax);
-	if (left(rx - bx, ry - by, px - rx, py - ry) +
-			left(rx - bx, ry - by, ax - rx, ay - ry) != 1)
-		return 0;
-	if (left(sx - ax, sy - ay, px - sx, py - sy) +
-			left(sx - ax, sy - ay, bx - sx, by - sy) != 1)
-		return 0;
-	return 0;
+
+
+    double d = (
+                    (  fabs( ((vy2-vy1)*px) - ((vx2-vx1)*py) + (vx2*vy1)- (vy2*vx1) )  )
+                            /
+                    (  sqrt( (  pow((vy2-vy1),2)  ) + (   pow(vx2-vx1,2)  )  )   )
+                );
+    return d;
 }
 
-int main(void)
+double AngelsOfVectors(double wx1, double wy1, double wx2, double wy2,
+                       double vx1, double vy1, double vx2, double vy2)
 {
-	return 0;
+    double W = sqrt( pow((wx2 - wx1),2) + pow((wy2 - wy1),2) );
+    double V = sqrt( pow((vx2 - vx1),2) + pow((vy2 - vy1),2) );
+    double temp = ( ((wx2 - wx1)*(vx2 - vx1)) + ((wy2 - wy1)*(vy2 - vy1)) ) / (W*V) ;
+    double teta = acos( temp )*(180.0/PI);
+    return fabs( teta );
+}
+
+double hausdorffDistance(double px, double py, double vx1, double vy1, double vx2, double vy2)
+{
+    double d = 0;
+    if ( AngelsOfVectors( vx1,vy1,px,py,vx1,vy1,vx2,vy2 ) < 90 && AngelsOfVectors( vx2,vy2,px,py,vx2,vy2,vx1,vy1 ) < 90 )
+    {
+        //cout << 1;
+        d = prependicularDistance( px,py,vx1,vy1,vx2,vy2 );
+    }
+    else if (AngelsOfVectors( vx1,vy1,px,py,vx1,vy1,vx2,vy2 ) >= 90)
+    {
+        //cout << 2;
+        d = distanceBetweenTwoPoints( px,py,vx1,vy1 );
+    }
+    else if ( AngelsOfVectors( vx2,vy2,px,py,vx2,vy2,vx1,vy1 ) >= 90 )
+    {
+        //cout << 3;
+        d = distanceBetweenTwoPoints( px,py,vx2,vy2 );
+    }
+    return d;
+}
+
+
+void Agrawal(double x[], double y[],int n, double epsilon)
+{
+
+    cout << x[0] << " " << y[0] << "\n";
+
+    bool a = true;
+
+    for (int i = 0; i < n; i++ )
+    {
+        a = true;
+        for (int j = i+1; j < n; j++ )
+        {
+            for (int k = i; k < j; k++)
+            {
+                if ( hausdorffDistance(x[k],y[k],x[i],y[i],x[j],y[j]) < epsilon ) {
+
+                } else {
+                    i = j-1;
+                    if ( i != 0)
+                        cout << x[i] << " " << y[i] << "\n";
+                    a = false;
+                    i--;
+                    break;
+                }
+            }
+            if (!a)
+                break;
+        }
+    }
+    cout << x[n-1] << " " << y[n-1] << "\n";
+}
+
+int main()
+{
+    //cout << "\n" <<hausdorffDistance(7,3,1,1,5,1) << endl;
+
+    //cout << "\n" <<hausdorffDistance(5,1,1,1,7,3) << endl;
+
+
+    //cout << "\n" <<hausdorffDistance(4,7,1,5,7,6) << endl;
+    //cout << "\n" <<hausdorffDistance(4,6.1,1,5,7,6) << endl;
+
+
+
+
+    //double x[] = {1,5,7};
+
+    //double y[] = {1,1,3};
+
+
+    //double x[] = {1,4,7,10,15,16,20};
+
+    //double y[] = {5,7,6,10,1,2,3};
+
+
+    double x[] = {1,4,7,10,15,16,20};
+
+    double y[] = {5,6.1,6,10,1,2,3};
+
+
+    Agrawal(x,y,7,1);
+
+
+
+
+
+    //cout << AngelsOfVectors(5,1,7,3,5,1,1,1) << "\n";
+
+    //cout << AngelsOfVectors(4,1,2,3,4,1,7,1) << "\n";
+
+    //cout << AngelsOfVectors(7,1,10,3,7,1,4,1);
+
+    return 0;
 }
