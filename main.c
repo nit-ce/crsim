@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <algorithm>
 
 #define PI 3.14159265
 
@@ -92,6 +93,41 @@ void Agrawal(double x[], double y[],int n, double epsilon)
     cout << x[n-1] << " " << y[n-1] << "\n";
 }
 
+
+void NewAlgAgrawal(double x[], double y[],int n)
+{
+    double min_x = *std::min_element(x,x+n);
+    double max_x = *std::max_element(x,x+n);
+
+    double min_y = *std::min_element(y,y+n);
+    double max_y = *std::max_element(y,y+n);
+
+    int arr_length = ( (double)(max_x - min_x ) / 0.1 ) + 5;
+    double new_x[arr_length];
+    double new_y[arr_length];
+
+    int k = 0;
+    for ( int i = 0; i < n-1; i++ )
+    {
+        for ( double j = x[i]; j <= x[i+1]; j += 0.1 )
+        {
+            new_x[k] = j;
+            new_y[k] = ( (double)( y[i+1]-y[i] ) / ( x[i+1]-x[i] ) )*( j - x[i] )+y[i];
+            k++;
+        }
+    }
+
+    new_x[arr_length-1] = x[n-1];
+    new_y[arr_length-1] = y[n-1];
+
+
+    //for ( int i = 0; i < arr_length; i++)
+        //cout << "new_x[" << i << "] = " << new_x[i] << "   " << "new_y[" << i << "] = " << new_y[i] << "\n";
+
+    Agrawal(new_x,new_y,arr_length,1);
+
+}
+
 int main()
 {
     //cout << "\n" <<hausdorffDistance(7,3,1,1,5,1) << endl;
@@ -120,8 +156,9 @@ int main()
     double y[] = {5,6.1,6,10,1,2,3};
 
 
-    Agrawal(x,y,7,1);
+    //Agrawal(x,y,7,1);
 
+    NewAlgAgrawal(x,y,7);
 
 
 
